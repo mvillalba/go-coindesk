@@ -11,9 +11,9 @@ func main() {
 
     // Fun stuff
     version()
-    currencies(client)
-    current(client)
-    currentForCurrency(client)
+    supportedCurrencies(client)
+    currentPrice(client)
+    currentPriceForCurrency(client)
     historical(client)
     historicalForYesterday(client)
     historicalForDates(client)
@@ -24,7 +24,7 @@ func version() {
     fmt.Println("BPI Interface Author:", bpi.Author)
 }
 
-func currencies(client *bpi.ApiClient) {
+func supportedCurrencies(client *bpi.ApiClient) {
     fmt.Println()
     fmt.Println("=======================================")
     fmt.Println("List all supported currencies.")
@@ -41,7 +41,7 @@ func currencies(client *bpi.ApiClient) {
     }
 }
 
-func current(client *bpi.ApiClient) {
+func currentPrice(client *bpi.ApiClient) {
     fmt.Println()
     fmt.Println("=======================================")
     fmt.Println("Get current BPI.")
@@ -69,7 +69,7 @@ func current(client *bpi.ApiClient) {
     }
 }
 
-func currentForCurrency(client *bpi.ApiClient) {
+func currentPriceForCurrency(client *bpi.ApiClient) {
     fmt.Println()
     fmt.Println("=======================================")
     fmt.Println("Get current BPI for symbol UYU.")
