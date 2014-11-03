@@ -24,6 +24,26 @@ type Currency struct {
     Country     string      `json:"country"`
 }
 
+type BPI struct {
+    Time        BPITime                 `json:"time"`
+    Disclaimer  string                  `json:"disclaimer"`
+    BPI         map[string]BPICurrency  `json:"bpi"`
+}
+
+type BPITime struct {
+    Updated     string      `json:"updated"`
+    UpdatedISO  string      `json:"updatedISO"`
+    UpdatedUK   string      `json:"updateduk"`
+}
+
+type BPICurrency struct {
+    Code        string      `json:"code"`
+    Symbol      string      `json:"symbol"`
+    Rate        json.Number `json:"rate"`
+    Description string      `json:"description"`
+    RateFloat   json.Number `json:"rate_float"`
+}
+
 func New() *ApiClient {
     return NewWithOptions(ProtoHttps, ApiUrl)
 }
@@ -41,6 +61,25 @@ func (c *ApiClient) SupportedCurrencies() ([]Currency, error) {
     if err != nil { return nil, err }
 
     return sc, nil
+}
+
+func (c *ApiClient) CurrentPrice() (*BPI, error) {
+    return c.current("currentprice")
+}
+
+func (c *ApiClient) CurrentPriceForCurrency(symbol string) (*BPI, error) {
+    return c.current("currentprice/" + symbol)
+}
+
+func (c *ApiClient) current(endpoint string) (*BPI, error) {
+    data, err := c.apiCall(endpoint, nil)
+    if err != nil { return nil, err }
+
+    var b BPI
+    err = json.Unmarshal(data, &b)
+    if err != nil { return nil, err }
+
+    return &b, nil
 }
 
 func (c *ApiClient) apiCall(endpoint string, args map[string]string) ([]byte, error) {
