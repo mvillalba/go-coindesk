@@ -6,7 +6,7 @@ var (
     VersionMajor = 0
     VersionMinor = 1
     VersionRevision = 0
-    VersionTag = "dev"
+    VersionTag = ""
     Version = fmt.Sprintf("%v.%v.%v", VersionMajor, VersionMinor, VersionRevision)
     AuthorName = "Martín Raúl Villalba"
     AuthorEMail = "martin@martinvillalba.com"
