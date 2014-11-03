@@ -14,6 +14,9 @@ func main() {
     currencies(client)
     current(client)
     currentForCurrency(client)
+    historical(client)
+    historicalForYesterday(client)
+    historicalForDates(client)
 }
 
 func version() {
@@ -91,5 +94,72 @@ func currentForCurrency(client *bpi.ApiClient) {
         fmt.Println("    Rate", r.BPI[k].Rate)
         fmt.Println("    Description", r.BPI[k].Description)
         fmt.Println("    RateFloat", r.BPI[k].RateFloat)
+    }
+}
+
+func historical(client *bpi.ApiClient) {
+    fmt.Println()
+    fmt.Println("=======================================")
+    fmt.Println("Get historical BPI (last 31 days).")
+    fmt.Println("=======================================")
+
+    r, err := client.Historical()
+    if err != nil {
+        fmt.Println("ERROR:", err)
+        return
+    }
+
+    fmt.Println("Disclaimer:", r.Disclaimer)
+    fmt.Println("Time / Updated:", r.Time.Updated)
+    fmt.Println("Time / UpdatedISO:", r.Time.UpdatedISO)
+    fmt.Println("BPI:")
+
+    for k := range r.BPI {
+        fmt.Println("  " + k, r.BPI[k])
+    }
+}
+
+func historicalForYesterday(client *bpi.ApiClient) {
+    fmt.Println()
+    fmt.Println("=======================================")
+    fmt.Println("Get historical BPI for yesterday.")
+    fmt.Println("=======================================")
+
+    r, err := client.HistoricalForYesterday()
+    if err != nil {
+        fmt.Println("ERROR:", err)
+        return
+    }
+
+    fmt.Println("Disclaimer:", r.Disclaimer)
+    fmt.Println("Time / Updated:", r.Time.Updated)
+    fmt.Println("Time / UpdatedISO:", r.Time.UpdatedISO)
+    fmt.Println("BPI:")
+
+    for k := range r.BPI {
+        fmt.Println("  " + k, r.BPI[k])
+    }
+}
+
+func historicalForDates(client *bpi.ApiClient) {
+    fmt.Println()
+    fmt.Println("=======================================")
+    fmt.Println("Get historical BPI from 2014-01-01 to")
+    fmt.Println("2014-02-28.")
+    fmt.Println("=======================================")
+
+    r, err := client.HistoricalForDates("2014-01-01", "2014-02-28")
+    if err != nil {
+        fmt.Println("ERROR:", err)
+        return
+    }
+
+    fmt.Println("Disclaimer:", r.Disclaimer)
+    fmt.Println("Time / Updated:", r.Time.Updated)
+    fmt.Println("Time / UpdatedISO:", r.Time.UpdatedISO)
+    fmt.Println("BPI:")
+
+    for k := range r.BPI {
+        fmt.Println("  " + k, r.BPI[k])
     }
 }

@@ -44,6 +44,17 @@ type BPICurrency struct {
     RateFloat   json.Number `json:"rate_float"`
 }
 
+type HistoricalBPI struct {
+    Time        HistoricalBPITime       `json:"time"`
+    Disclaimer  string                  `json:"disclaimer"`
+    BPI         map[string]json.Number  `json:"bpi"`
+}
+
+type HistoricalBPITime struct {
+    Updated     string      `json:"updated"`
+    UpdatedISO  string      `json:"updatedISO"`
+}
+
 func New() *ApiClient {
     return NewWithOptions(ProtoHttps, ApiUrl)
 }
@@ -82,13 +93,45 @@ func (c *ApiClient) current(endpoint string) (*BPI, error) {
     return &b, nil
 }
 
+func (c *ApiClient) Historical() (*HistoricalBPI, error) {
+    return c.HistoricalWithOptions(false, "", "")
+}
+
+func (c *ApiClient) HistoricalForYesterday() (*HistoricalBPI, error) {
+    return c.HistoricalWithOptions(true, "", "")
+}
+
+func (c *ApiClient) HistoricalForDates(start string, end string) (*HistoricalBPI, error) {
+    return c.HistoricalWithOptions(false, start, end)
+}
+
+func (c *ApiClient) HistoricalWithOptions(yesterday bool, start string, end string) (*HistoricalBPI, error) {
+    args := make(map[string]string)
+
+    if yesterday {
+        args["for"] = "yesterday"
+    } else if start != "" && end != "" {
+        args["start"] = start
+        args["end"] = end
+    }
+
+    data, err := c.apiCall("historical/close", args)
+    if err != nil { return nil, err }
+
+    var hb HistoricalBPI
+    err = json.Unmarshal(data, &hb)
+    if err != nil { return nil, err }
+
+    return &hb, nil
+}
+
 func (c *ApiClient) apiCall(endpoint string, args map[string]string) ([]byte, error) {
     // Build URL
     argstring := ""
     for k := range args {
         argstring = fmt.Sprintf("%v&%v=%v", argstring, k, args[k])
     }
-    if argstring != "" { argstring = argstring[1:len(argstring)] }
+    if argstring != "" { argstring = "?" + argstring[1:len(argstring)] }
 
     url := fmt.Sprintf("%v://%v/%v.json%v", c.proto, c.url, endpoint, argstring)
 
