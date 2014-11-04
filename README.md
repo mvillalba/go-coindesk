@@ -7,7 +7,7 @@ Price Index) API.
 
 ## Install
 
-    go get github.com/mvillalba/go-coindesk
+    go get github.com/mvillalba/go-coindesk/bpi
 
 
 ## Usage
