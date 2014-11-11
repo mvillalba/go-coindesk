@@ -4,6 +4,7 @@ import (
     "encoding/json"
     "io/ioutil"
     "net/http"
+    "net/url"
     "errors"
     "fmt"
 )
@@ -17,6 +18,7 @@ var (
 type ApiClient struct {
     proto       string
     url         string
+    client      *http.Client
 }
 
 type Currency struct {
@@ -60,7 +62,7 @@ func New() *ApiClient {
 }
 
 func NewWithOptions(proto string, url string) *ApiClient {
-    return &ApiClient{proto: proto, url: url}
+    return &ApiClient{proto: proto, url: url, client: &http.Client{}}
 }
 
 func (c *ApiClient) SupportedCurrencies() ([]Currency, error) {
@@ -106,13 +108,13 @@ func (c *ApiClient) HistoricalForDates(start string, end string) (*HistoricalBPI
 }
 
 func (c *ApiClient) HistoricalWithOptions(yesterday bool, start string, end string) (*HistoricalBPI, error) {
-    args := make(map[string]string)
+    args := url.Values{}
 
     if yesterday {
-        args["for"] = "yesterday"
+        args.Add("for", "yesterday")
     } else if start != "" && end != "" {
-        args["start"] = start
-        args["end"] = end
+        args.Add("start", start)
+        args.Add("end", end)
     }
 
     data, err := c.apiCall("historical/close", args)
@@ -125,18 +127,19 @@ func (c *ApiClient) HistoricalWithOptions(yesterday bool, start string, end stri
     return &hb, nil
 }
 
-func (c *ApiClient) apiCall(endpoint string, args map[string]string) ([]byte, error) {
+func (c *ApiClient) apiCall(endpoint string, args url.Values) ([]byte, error) {
     // Build URL
-    argstring := ""
-    for k := range args {
-        argstring = fmt.Sprintf("%v&%v=%v", argstring, k, args[k])
+    url := fmt.Sprintf("%v://%v/%v.json", c.proto, c.url, endpoint)
+    if len(args) > 0 {
+        url = fmt.Sprintf("%v?%v", url, args.Encode())
     }
-    if argstring != "" { argstring = "?" + argstring[1:len(argstring)] }
 
-    url := fmt.Sprintf("%v://%v/%v.json%v", c.proto, c.url, endpoint, argstring)
+    // Build request
+    req, err := http.NewRequest("GET", url, nil)
+    if err != nil { return nil, err }
 
     // Make request
-    resp, err := http.Get(url)
+    resp, err := c.client.Do(req)
     if err != nil { return nil, err }
 
     // Retrieve raw JSON response
