@@ -18,6 +18,7 @@ See bpidemo/main.go for usage examples.
 ## TODO
 
  * Test, test, test.
+ * Allow User-Agent and proxy options to be set.
 
 ## Donate
 
