@@ -9,7 +9,7 @@ import (
     "fmt"
 )
 
-var (
+const (
     ProtoHttp = "http"
     ProtoHttps = "https"
     ApiUrl = "api.coindesk.com/v1/bpi"
